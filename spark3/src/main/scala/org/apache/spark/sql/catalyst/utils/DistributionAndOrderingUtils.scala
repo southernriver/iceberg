@@ -123,11 +123,7 @@ object DistributionAndOrderingUtils {
       child: catalyst.expressions.Expression,
       direction: catalyst.expressions.SortDirection,
       nullOrdering: catalyst.expressions.NullOrdering): catalyst.expressions.SortOrder = {
-    if (Spark3VersionUtil.isSpark30) {
-      sortOrderCtor.newInstance(child, direction, nullOrdering, Set.empty)
-    } else {
-      sortOrderCtor.newInstance(child, direction, nullOrdering, Seq.empty)
-    }
+    sortOrderCtor.newInstance(child, direction, nullOrdering, Seq.empty)
   }
 
   private def toCatalyst(
@@ -150,7 +146,8 @@ object DistributionAndOrderingUtils {
     expr match {
       case s: SortOrder =>
         val catalystChild = toCatalyst(s.expression(), query, resolver)
-        createSortOrder(catalystChild, toCatalyst(s.direction), toCatalyst(s.nullOrdering))
+        
+      (catalystChild, toCatalyst(s.direction), toCatalyst(s.nullOrdering))
       case it: IdentityTransform =>
         resolve(it.ref.fieldNames)
       case BucketTransform(numBuckets, ref) =>
